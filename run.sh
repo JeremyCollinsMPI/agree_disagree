@@ -1,2 +1,2 @@
-docker build -t agree .
-docker run -it --rm -v $PWD:/src --name backer -p 8080:8080 agree python main.py
+# docker build -t backer_frontend .
+docker run -it --rm  -v $PWD:/moose -p 6000:3000 backer_frontend /bin/bash /moose/entrypoint.sh
