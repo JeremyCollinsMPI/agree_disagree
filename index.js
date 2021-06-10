@@ -1,15 +1,3 @@
-plan
-
-you have a dictionary like this,
-
-{"text": 'I think this', "links": {"id": {"link_text": "supported by", "text": "because of this", "links": [...]}}}
-
-the text in this case becomes the main header
-for every item in links, you print the text within a collapsible.
-in this collapsible, you have an id, and onClick = a certain function
-the function makes the collapsible display the elements in 
-
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
@@ -21,22 +9,22 @@ class Steps extends React.Component {
     this.ip = "http://103.102.44.216";
     this.state = {
     text_dict: {
-      "id": "tayo 1"
+      "id": "tayo 1",
       "text": "Main opinion",
       "links": {
-        {"id": "tayo 2",
+        "id": "tayo 2",
+        "link_text": "supported by",
+        "text": "First reason",
+        "links": {
+          "id": "tayo 3",
           "link_text": "supported by",
-          "text": "First reason",
-          "links": {
-            "id": "tayo 3",
-            "link_text": "supported by",
-            "text": "Reason supporting first reason",
-            "links": []
-            }
+          "text": "Reason supporting first reason",
+          "links": []
           }
         }
-      }    
-    }
+      }
+    }    
+  }
 
 
 
@@ -45,7 +33,7 @@ class Steps extends React.Component {
 //     this.handleInputDropdownChange = this.handleInputDropdownChange.bind(this);
 //     this.onFileChange = this.onFileChange.bind(this); 
 //     this.handleAdditionalInputChange = this.handleAdditionalInputChange.bind(this);
-  }
+
 
   render() {
     return (   
