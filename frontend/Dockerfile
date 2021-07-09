@@ -4,5 +4,6 @@ RUN rm -f my-app/src/*
 COPY package.json my-app/
 WORKDIR my-app
 RUN npm install
+RUN npm install react-router-dom
 
 
