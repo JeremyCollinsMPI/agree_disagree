@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 import requests
 import json
 from copy import deepcopy
+import os
 
 app = Flask(__name__)
 
@@ -47,9 +48,11 @@ def edit_node_recursively(context):
   mother = context['mother']
   if to_update['id'] == id:
       to_update['text'] = context['new_text']
+      to_update['link_text'] = context['relationship']
   else:
     for link in to_update['links']:
-      edit_node_recursively({'to_update': link, 'id': id, 'mother': to_update, 'new_text': context['new_text']})
+      edit_node_recursively({'to_update': link, 'id': id, 'mother': to_update, 'new_text': context['new_text'],
+          'relationship': context['relationship']})
   
 def delete_node(context):
   page = context['page']
@@ -95,10 +98,9 @@ def edit_path():
   content = request.json
   page = request.args.get('page')
   id = request.args.get('id')
-  new_text = request.args.get('new_text')
-  print(page)
-  print(id)
-  edit_node_context = {'id': id, 'page': page, 'new_text': new_text}
+  value = content.get('value')
+  relationship = content.get('relationship')
+  edit_node_context = {'id': id, 'page': page, 'new_text': value, 'relationship': relationship}
   edit_node_result = edit_node(edit_node_context)
   json.dump(edit_node_result['result'], open('data/' + page + '.json', 'w'), indent=4)
   return 'fine'
@@ -111,6 +113,42 @@ def get_path():
     return {'result': get_data_result['result']}
   else:
     return {'result': 'Page Not Found'}
+
+@app.route('/pages', methods=['GET'])
+def pages_path():
+  files = os.listdir('data')
+  files = [x for x in files if '.json' in x]
+  result = []
+  for file in files:
+    page = file.replace('.json', '')
+    get_data_result = get_data({'page': page})
+    headline = get_data_result['result']['text']
+    result.append({'text': headline, 'page': page})
+  return {'result': result}
+
+@app.route('/add_new_page', methods=['POST'])
+def add_new_page_path():
+  files = os.listdir('data')
+  files = [x for x in files if '.json' in x]
+  content = request.json
+  new_page_input = content.get('new_page_input')
+  print(new_page_input)
+  to_write = {
+   "id":"none",
+   "text": new_page_input,
+   "links":[]
+  }
+  filename = new_page_input.replace(' ', '_') + '.json'
+  print(filename)
+  if not filename in files:
+    json.dump(to_write, open('data/' + filename, 'w'))
+    print('success')
+    return {'result': 'success'}
+  else:
+    print('fail')
+    return {'result': 'failed'}
+  
+
 
 if __name__ == '__main__':
   app.run(host='0.0.0.0', port=8080)
