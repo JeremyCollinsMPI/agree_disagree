@@ -312,7 +312,8 @@ class Steps extends React.Component {
     return (<form id={id} autocomplete="off" onSubmit={this.handleTextSubmit}>
   <label>
     Write here:
-    <input type="text" size="200" id={id} value={this.checkId(this.state.current_text_input, id)} onChange={this.handleChange}/>
+    <br></br>
+    <textarea rows="7" cols="50" wrap="soft" id={id} class="textInput" value={this.checkId(this.state.current_text_input, id)} onChange={this.handleChange}/>
 
   </label>
 <select name="functions" id={"relationship_" + id} onChange={this.handleRelationshipChange}>
@@ -325,6 +326,7 @@ class Steps extends React.Component {
     <option value="Source">Source</option>
     <option value="Subtask">Subtask</option>
   </select>  
+  <input type = "submit" value = "submit" />
 </form>)
   }
 
@@ -337,7 +339,7 @@ class Steps extends React.Component {
     return (<form id={id} autocomplete="off" onSubmit={this.handleEditTextSubmit}>
   <label>
     Edit:
-    <input type="text" id={id} value={this.checkId(this.state.current_text_input, id)} onChange={this.handleChange}/>
+    <textarea type="text" ows="7" cols="50" wrap="soft" id={id} value={this.checkId(this.state.current_text_input, id)} onChange={this.handleChange}/>
 
   </label>
 <select value={relationship} name="functions" id={"relationship_" + id} onChange={this.handleRelationshipChange}>
@@ -539,9 +541,10 @@ ReactDOM.render(<Steps />, document.getElementById("root"));
   40. try to make home page call the api less often
   41. make a general tool for loading a file with that format
   42. look at reddit and whether it does something similar for conversation
-  43. make a sample page for your tasks - IN PROGRESS
+  43. make a sample page for your tasks - DONE
   44. make indentation larger
   45. maybe make the boxes less wide
+  46. look into making the number of open disputes visible - IN PROGRESS
   
 12. storing in json file - DONE
 1. design - DONE
@@ -684,6 +687,9 @@ ReactDOM.render(<Steps />, document.getElementById("root"));
 
 39.5 make buttons clickable to direct to their page - DONE
 1. plan how it could redirect - DONE
+
+46. look into making the number of open disputes visible - IN PROGRESS
+1. look at what it would need in the backend - IN PROGRESS
 
 notes
 
