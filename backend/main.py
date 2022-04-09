@@ -18,6 +18,32 @@ def get_data(context):
   except:
     return {'result': None}
 
+def add_number_of_open_disputes(context):
+  node = context['node']
+  if node.get('links', []) == []:
+    number_of_open_disputes = 0
+    modified_node = {**node, **{'number_of_open_disputes': number_of_open_disputes}}
+    return {'result': modified_node, 'number_of_open_disputes': 0, 'open': True}
+  else:
+    number_of_open_disputes = 0
+    open = True
+    for i in range(len(node.get('links'))):
+      link = node.get('links')[i]
+      add_number_of_open_disputes_result = add_number_of_open_disputes({'node': link})
+      modified_link = add_number_of_open_disputes_result['result']
+      link_open_disputes = add_number_of_open_disputes_result['number_of_open_disputes']
+      link_open = add_number_of_open_disputes_result['open']
+      if link['link_text'].lower() in ['contradicted by', 'relationship disputed by']:
+        if link_open:
+          open = False
+          number_of_open_disputes = number_of_open_disputes + 1
+      elif link['link_text'].lower() in ['supported by', 'source']:
+        number_of_open_disputes = number_of_open_disputes + link_open_disputes
+      node['links'][i] = modified_link
+    
+    modified_node = {**node, **{'number_of_open_disputes': number_of_open_disputes}}
+  return {'result': modified_node, 'number_of_open_disputes': number_of_open_disputes,'open': open}
+  
 def update_recursively(to_update, id, value, link_text):
   if to_update['id'] == id:
     new_id = id + '_' + str(len(to_update['links']) + 1)
@@ -109,8 +135,9 @@ def edit_path():
 def get_path():
   page = request.args.get('page')
   get_data_result = get_data({'page': page})
+  result = add_number_of_open_disputes({'node': get_data_result['result']})['result']
   if not get_data_result['result'] == None:
-    return {'result': get_data_result['result']}
+    return {'result': result}
   else:
     return {'result': 'Page Not Found'}
 

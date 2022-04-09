@@ -219,6 +219,9 @@ class Steps extends React.Component {
     const pointsWithinPoint = this.makePointsWithinPoint(thing)
     const deleteButton = this.makeDeleteButton(thing['id']);
     const editButton = this.makeEditButton(thing['id']);
+    
+    const numberOfOpenDisputes = 'Number of open disputes: ' + thing['number_of_open_disputes'];
+    
     if(this.state.editing[thing['id']]==true) {
 //     return (<div><button type="button" class="collapsible" onClick={this.handleClick}>{'[' + thing['link_text'] + ']'} <br/>{thing['text']}</button>
 //            <div class="content">{pointsWithinPoint}</div>{deleteButton}{editButton}</div>)
@@ -226,7 +229,7 @@ class Steps extends React.Component {
     return(textInput)
     } else {
     return (<div><button type="button" class="collapsible" onClick={this.handleClick}>{'[' + thing['link_text'] + ']'} <br/>{thing['text']}</button>
-           <div class="content">{pointsWithinPoint}</div>{deleteButton}{editButton}</div>)
+           <div class="content">{pointsWithinPoint}</div>{deleteButton}{editButton}     {numberOfOpenDisputes}</div>)
     }
   }
   
@@ -689,7 +692,9 @@ ReactDOM.render(<Steps />, document.getElementById("root"));
 1. plan how it could redirect - DONE
 
 46. look into making the number of open disputes visible - IN PROGRESS
-1. look at what it would need in the backend - IN PROGRESS
+1. look at what it would need in the backend - DONE
+2. write frontend part - DONE
+3. try repositioning the 'number of open disputes' text - IN PROGRESS
 
 notes
 
