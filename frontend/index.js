@@ -11,7 +11,7 @@ class Steps extends React.Component {
     this.state = {
     text_dict: {
       "id": "NONE",
-      "text": "NONE",
+      "text": "",
       "links": [
         ]
       },
@@ -65,6 +65,8 @@ class Steps extends React.Component {
     this.makeAddNewPageSubmitButton = this.makeAddNewPageSubmitButton.bind(this);
     this.handleAddNewPageButtonClick = this.handleAddNewPageButtonClick.bind(this);
     this.handleAddNewPageTextInputChange = this.handleAddNewPageTextInputChange.bind(this);
+    
+    this.timeout = this.timeout.bind(this);
   }
     
   handleClick(e) {
@@ -146,7 +148,6 @@ class Steps extends React.Component {
     editingDict[id] = true;
     this.setState({'editing': editingDict});
 //     this.setState({'page': 'NONE'})
-    console.log('HELLO FUCKER');
     console.log(this.state.editing_relationship_dict);
     const defaultText = this.state.editing_text_dict[id];
     const defaultRelationship = this.state.editing_relationship_dict[id];
@@ -220,8 +221,11 @@ class Steps extends React.Component {
     const deleteButton = this.makeDeleteButton(thing['id']);
     const editButton = this.makeEditButton(thing['id']);
     
-    const numberOfOpenDisputes = 'Number of open disputes: ' + thing['number_of_open_disputes'];
-    
+    var numberOfOpenDisputes = 'Number of open disputes: ' + thing['number_of_open_disputes'];
+    if (thing['number_of_open_disputes'] == 0){
+       numberOfOpenDisputes = '';
+    }
+        
     if(this.state.editing[thing['id']]==true) {
 //     return (<div><button type="button" class="collapsible" onClick={this.handleClick}>{'[' + thing['link_text'] + ']'} <br/>{thing['text']}</button>
 //            <div class="content">{pointsWithinPoint}</div>{deleteButton}{editButton}</div>)
@@ -325,6 +329,7 @@ class Steps extends React.Component {
     <option value="Contradicted by">Contradicted by</option>
     <option value="Relationship disputed by">Relationship disputed by</option>
     <option value="Issue">Issue</option>
+    <option value="Closes">Closes</option>
     <option value="Comment">Comment</option>
     <option value="Source">Source</option>
     <option value="Subtask">Subtask</option>
@@ -342,7 +347,7 @@ class Steps extends React.Component {
     return (<form id={id} autocomplete="off" onSubmit={this.handleEditTextSubmit}>
   <label>
     Edit:
-    <textarea type="text" ows="7" cols="50" wrap="soft" id={id} value={this.checkId(this.state.current_text_input, id)} onChange={this.handleChange}/>
+    <textarea type="text" rows="7" cols="50" wrap="soft" id={id} value={this.checkId(this.state.current_text_input, id)} onChange={this.handleChange}/>
 
   </label>
 <select value={relationship} name="functions" id={"relationship_" + id} onChange={this.handleRelationshipChange}>
@@ -351,6 +356,7 @@ class Steps extends React.Component {
     <option value="Contradicted by">Contradicted by</option>
     <option value="Relationship disputed by">Relationship disputed by</option>
     <option value="Issue">Issue</option>
+    <option value="Closes">Closes</option>
     <option value="Comment">Comment</option>
     <option value="Source">Source</option>
     <option value="Subtask">Subtask</option>
@@ -458,11 +464,16 @@ class Steps extends React.Component {
 
   async getData(id) {
   let url = this.ip + ":8080/get?page=" + id;
+  await this.timeout(300);
   await axios.get(url).then(response => {this.setState({"text_dict": response.data['result']})});   
   this.setState({"page": id});
   this.makeEditingDict();
   this.makeEditingTextDict();
   this.makeEditingRelationshipDict();
+  }
+  
+  timeout(delay: number) {
+    return new Promise( res => setTimeout(res, delay) );
   }
 
   render() {
@@ -475,7 +486,7 @@ class Steps extends React.Component {
       const homePage = this.makeHomePage();
       return(homePage)
     }
-    if(this.state.page=="NONE"){
+    if(this.state.page=="NONE"){     
       this.getData(urlId);
     }
     if(this.state.makePoints==true){
@@ -547,7 +558,16 @@ ReactDOM.render(<Steps />, document.getElementById("root"));
   43. make a sample page for your tasks - DONE
   44. make indentation larger
   45. maybe make the boxes less wide
-  46. look into making the number of open disputes visible - IN PROGRESS
+  46. look into making the number of open disputes visible - DONE
+  47. have a relationship 'Closes' - DONE
+  48. maybe print 'closed' if something is closed
+  49. copy node button - IN PROGRESS
+  50. normal functionality of a social media site
+  51. make the interface look nicer
+  52. make compelling content
+  53. promoting it
+  54. code refactoring now that i understand reactjs
+  55. show number of children that nodes have
   
 12. storing in json file - DONE
 1. design - DONE
@@ -691,10 +711,16 @@ ReactDOM.render(<Steps />, document.getElementById("root"));
 39.5 make buttons clickable to direct to their page - DONE
 1. plan how it could redirect - DONE
 
-46. look into making the number of open disputes visible - IN PROGRESS
+46. look into making the number of open disputes visible - DONE
 1. look at what it would need in the backend - DONE
 2. write frontend part - DONE
-3. try repositioning the 'number of open disputes' text - IN PROGRESS
+3. try repositioning the 'number of open disputes' text - DONE
+4. fix the mis-counting (cannot reproduce) - NOT DOING
+
+49. copy node button - IN PROGRESS
+1. plan - DONE
+2. write backend function for expanding copy nodes - DONE
+3. find an example and test - IN PROGRESS
 
 notes
 
@@ -720,5 +746,27 @@ you need to make the dictionary editing_relationship_dict at the beginning, whic
 makeEditingRelationshipDict.  
 you need to make sure that function is declared at the beginning of the file, and the functions it calls.
 
+49. copy node button
+pressing the copy button maybe just displays the node id, and tells you to copy and paste it into another box.
+if you paste it, then node is displayed there.
 
+so main.py needs to process this; 
+or in index.js, when you click on a button but the text begins with s @ (or whatever symbol I am using, say @ for now),
+then it needs to call the backend to get the data. it then updates the page data.
+a simpler approach is to load the entire page data when you open the page. in some cases that might be large.
+that can be the first version.
+or maybe;
+what you can do is, when you click on a button in index.js, rather than displaying the text immediately, it has the id;
+it then calls a database which has the text for it.
+let's outline the most efficient version:
+you call the api when you open a page, it returns only the immediate children.
+if you click on one, it then calls the api again with that node id, and it returns the data for that, giving only just the
+immediate children again.
+for the moment, I will take the naive approach.
+or perhaps at least design it so that you can switch approach later on;
+e.g. you have the structure of the data, and the moment all of it is returned; but consider how later you can return
+only part of it.
+
+I'm sticking with the first version;
+if you copy a reference to a node, then the data for that is loaded in the backend
 */
