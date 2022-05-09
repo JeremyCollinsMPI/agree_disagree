@@ -6,17 +6,13 @@ import requests
 import json
 from copy import deepcopy
 import os
+from copy_node_functions import ExpandAnyCopyNodes, get_data
 
 app = Flask(__name__)
 
 CORS(app)
 
-def get_data(context):
-  page = context['page']
-  try:
-    return {'result': json.load(open('data/' + page + '.json', 'r'))}
-  except:
-    return {'result': None}
+
 
 def add_number_of_open_disputes(context):
   node = context['node']
@@ -33,14 +29,14 @@ def add_number_of_open_disputes(context):
       modified_link = add_number_of_open_disputes_result['result']
       link_open_disputes = add_number_of_open_disputes_result['number_of_open_disputes']
       link_open = add_number_of_open_disputes_result['open']
-      if link['link_text'].lower() in ['contradicted by', 'relationship disputed by']:
+      if link['link_text'].lower() in ['contradicted by', 'relationship disputed by', 'closes']:
         if link_open:
           open = False
-          number_of_open_disputes = number_of_open_disputes + 1
+          if not link['link_text'].lower() == 'closes':
+              number_of_open_disputes = number_of_open_disputes + 1
       elif link['link_text'].lower() in ['supported by', 'source']:
         number_of_open_disputes = number_of_open_disputes + link_open_disputes
       node['links'][i] = modified_link
-    
     modified_node = {**node, **{'number_of_open_disputes': number_of_open_disputes}}
   return {'result': modified_node, 'number_of_open_disputes': number_of_open_disputes,'open': open}
   
@@ -96,6 +92,13 @@ def edit_node(context):
   edit_node_recursively(context | {'to_update': to_update, 'id': id, 'mother': to_update})
   return {'result': to_update}
 
+def expand_any_copy_nodes(context):
+  data = context['result']
+  converter = ExpandAnyCopyNodes(data=data)
+  converter.run()
+  data = converter.data
+  return {'result': data}
+
 @app.route('/update', methods=['POST'])
 def run_path():
   content = request.json
@@ -135,7 +138,8 @@ def edit_path():
 def get_path():
   page = request.args.get('page')
   get_data_result = get_data({'page': page})
-  result = add_number_of_open_disputes({'node': get_data_result['result']})['result']
+  expand_any_copy_nodes_result = expand_any_copy_nodes(get_data_result)
+  result = add_number_of_open_disputes({'node': expand_any_copy_nodes_result['result']})['result']
   if not get_data_result['result'] == None:
     return {'result': result}
   else:
@@ -146,11 +150,13 @@ def pages_path():
   files = os.listdir('data')
   files = [x for x in files if '.json' in x]
   result = []
+  to_exclude = ['norp']
   for file in files:
     page = file.replace('.json', '')
     get_data_result = get_data({'page': page})
     headline = get_data_result['result']['text']
-    result.append({'text': headline, 'page': page})
+    if not headline in to_exclude:
+      result.append({'text': headline, 'page': page})
   return {'result': result}
 
 @app.route('/add_new_page', methods=['POST'])
