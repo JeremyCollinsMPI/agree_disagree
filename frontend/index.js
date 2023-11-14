@@ -26,7 +26,8 @@ class Steps extends React.Component {
     editing_relationship_dict: {},
     pageList: [],
     urlId: null,
-    new_page_input: ''
+    new_page_input: '',
+    currently_copying: null
     }    
     this.makePoints = this.makePoints.bind(this);
     this.makePointsWithinPoint = this.makePointsWithinPoint.bind(this);
@@ -47,6 +48,7 @@ class Steps extends React.Component {
     this.makeFinishEditingButton = this.makeFinishEditingButton.bind(this);
     this.handleDeleteButtonClick = this.handleDeleteButtonClick.bind(this);
     this.handleEditButtonClick = this.handleEditButtonClick.bind(this);
+    this.handleCopyButtonClick = this.handleCopyButtonClick.bind(this);
     this.handleFinishEditingButtonClick = this.handleFinishEditingButtonClick.bind(this);
     this.sendDeleteData = this.sendDeleteData.bind(this);
     this.sendEditData = this.sendEditData.bind(this);
@@ -170,6 +172,12 @@ class Steps extends React.Component {
     this.setState({'makePoints': true});
   }
   
+  handleCopyButtonClick(e){
+    const target = e.target;
+    const id = target.id;
+    this.setState({"currently_copying": id});
+  }
+
   makeDeleteButton(id){
   return(<button id={id} class="deleteButton" onClick={this.handleDeleteButtonClick}>delete</button>)
   }
@@ -178,13 +186,17 @@ class Steps extends React.Component {
   return(<button id={id} class="editButton" onClick={this.handleEditButtonClick}>edit</button>)
   }
   
+  makeCopyButton(id){
+  return(<button id={id} class="copyButton" onClick={this.handleCopyButtonClick}>copy</button>)
+  }
+  
   makeFinishEditingButton(id){
   return(<button id={id} class="finishEditingButton" onClick={this.handleFinishEditingButtonClick}>Finish editing</button>)
   }
   
   async sendDeleteData(id){
     let data = {'id': id}
-    let url = this.ip + ":8080/delete?page=" + this.state.page + "&id=" + id;
+    let url = this.ip + ":8081/delete?page=" + this.state.page + "&id=" + id;
        await axios.post(url, data).then((response) => {
   console.log('hello');
   }, (error) => {
@@ -192,11 +204,11 @@ class Steps extends React.Component {
   });
   }  
 
-  async sendEditData(id, value, relationship){
+  async sendEditData(id, value, relationship, page){
     let data = {'id': id, 'value': value, 'relationship': relationship};
     console.log('frnk');
     console.log(relationship);
-    let url = this.ip + ":8080/edit?page=" + this.state.page + "&id=" + id;
+    let url = this.ip + ":8081/edit?page=" + page + "&id=" + id;
        await axios.post(url, data).then((response) => {
   console.log('hello');
   }, (error) => {
@@ -209,7 +221,7 @@ class Steps extends React.Component {
     console.log(id);
     console.log(value);
     console.log(relationship);
-    let url = this.ip + ":8080/update?page=" + this.state.page;
+    let url = this.ip + ":8081/update?page=" + this.state.page;
        await axios.post(url, data).then((response) => {
   }, (error) => {
   console.log(error);
@@ -220,20 +232,26 @@ class Steps extends React.Component {
     const pointsWithinPoint = this.makePointsWithinPoint(thing)
     const deleteButton = this.makeDeleteButton(thing['id']);
     const editButton = this.makeEditButton(thing['id']);
+    const copyButton = this.makeCopyButton(thing['id']);
     
     var numberOfOpenDisputes = 'Number of open disputes: ' + thing['number_of_open_disputes'];
     if (thing['number_of_open_disputes'] == 0){
        numberOfOpenDisputes = '';
     }
+
+    var copyLink = '';
+    if (thing['id'] == this.state.currently_copying){
+        copyLink = '@' + thing['page'] + '&id=' + thing['id'];
+    }
         
     if(this.state.editing[thing['id']]==true) {
 //     return (<div><button type="button" class="collapsible" onClick={this.handleClick}>{'[' + thing['link_text'] + ']'} <br/>{thing['text']}</button>
 //            <div class="content">{pointsWithinPoint}</div>{deleteButton}{editButton}</div>)
-    const textInput = this.makeEditingTextInput(thing['id']);
+    const textInput = this.makeEditingTextInput(thing['id'], thing['page']);
     return(textInput)
     } else {
     return (<div><button type="button" class="collapsible" onClick={this.handleClick}>{'[' + thing['link_text'] + ']'} <br/>{thing['text']}</button>
-           <div class="content">{pointsWithinPoint}</div>{deleteButton}{editButton}     {numberOfOpenDisputes}</div>)
+           <div class="content">{pointsWithinPoint}</div>{deleteButton}{editButton}{copyButton}     {numberOfOpenDisputes}{copyLink}</div>)
     }
   }
   
@@ -249,17 +267,6 @@ class Steps extends React.Component {
     return (text_dict)
   }
 
-  async sendData(id, value, relationship){
-    let data = {'id': id, 'value': value, 'relationship': relationship};
-    console.log(id);
-    console.log(value);
-    console.log(relationship);
-    let url = this.ip + ":8080/update?page=" + this.state.page;
-       await axios.post(url, data).then((response) => {
-  }, (error) => {
-  console.log(error);
-  });
-  }  
   
   handleChange(event) {
   console.log("HANDLE CHANGE");
@@ -294,14 +301,17 @@ class Steps extends React.Component {
   handleEditTextSubmit(e){
     const target = e.target;
     const id = target.id;
+    const page = target.getAttribute('page');
     const value = this.state.current_text_input;
     const relationship = this.state.current_relationship;
     e.preventDefault();
     var text_dict = this.state.text_dict;
     this.setState({'text_dict': text_dict});
-    console.log('HANDLE TEXT SUBMIT');
+    console.log('HANDLE EDIT TEXT SUBMIT');
+    console.log(target);
     console.log(value);
-    this.sendEditData(id, value, relationship);
+    console.log(page);
+    this.sendEditData(id, value, relationship, page);
     this.setState({'page': 'NONE'})
     this.setState({'current_text_input': ''})
   }
@@ -338,13 +348,13 @@ class Steps extends React.Component {
 </form>)
   }
 
-  makeEditingTextInput(id){
+  makeEditingTextInput(id, page){
     const finishEditingButton = this.makeFinishEditingButton();
     var relationship = this.state.current_relationship;
     console.log(relationship);
     console.log('HELLO MATE');
     console.log(relationship);
-    return (<form id={id} autocomplete="off" onSubmit={this.handleEditTextSubmit}>
+    return (<form id={id} page={page} autocomplete="off" onSubmit={this.handleEditTextSubmit}>
   <label>
     Edit:
     <textarea type="text" rows="7" cols="50" wrap="soft" id={id} value={this.checkId(this.state.current_text_input, id)} onChange={this.handleChange}/>
@@ -378,15 +388,12 @@ class Steps extends React.Component {
     this.setState({'page': 'NONE'});
   }
  
- 
-
-  
   makePageButtons(buttonDatum){
   return (<div><button id={buttonDatum.page} onClick={this.handleHomePageButtonClick}>{buttonDatum.text}</button><br/></div>)
   }
   
   async getPageData(){
-    let url = this.ip + ":8080/pages";
+    let url = this.ip + ":8081/pages";
     await axios.get(url).then(response => {this.setState({"pageList": response.data['result']})}); 
     console.log(this.state.pageList);
     console.log('fun');
@@ -398,7 +405,7 @@ class Steps extends React.Component {
   
   async handleAddNewPageButtonClick() {
     let data = {'new_page_input': this.state.new_page_input};
-    let url = this.ip + ":8080/add_new_page";
+    let url = this.ip + ":8081/add_new_page";
        await axios.post(url, data).then((response) => {
   }, (error) => {
   console.log(error);
@@ -463,7 +470,7 @@ class Steps extends React.Component {
   }
 
   async getData(id) {
-  let url = this.ip + ":8080/get?page=" + id;
+  let url = this.ip + ":8081/get?page=" + id;
   await this.timeout(300);
   await axios.get(url).then(response => {this.setState({"text_dict": response.data['result']})});   
   this.setState({"page": id});
@@ -720,7 +727,48 @@ ReactDOM.render(<Steps />, document.getElementById("root"));
 49. copy node button - IN PROGRESS
 1. plan - DONE
 2. write backend function for expanding copy nodes - DONE
-3. find an example and test - IN PROGRESS
+3. find an example and test - DONE
+4. finish off the backend function - DONE
+5. work out what the behaviour should be if you press delete on a copied node - DONE
+6. make copied nodes editable so that the original will also be edited
+7. make button for showing the id - IN PROGRESS
+
+49.5 work out what the behaviour should be if you press delete on a copied node - DONE
+1. work out what the current behaviour would be - DONE
+2. plan how you could make edits to the copy identical to editing the original - DONE
+
+49.6 make copied nodes editable so that the original will also be edited - IN PROGRESS
+1. plan tasks - DONE
+2. handleDeleteButtonClick
+3. makeDeleteButton
+4. makeFinishEditingButton (actually not needed) - DONE
+5. sendDeleteData
+6. sendEditData - DONE
+7. sendData
+8. handleTextSubmit
+9. handleEditTextSubmit - DONE
+10. makePoint
+11. backend function get_path needs to add page information as well as id - DONE
+12. makeEditingTextInput - DONE
+13. makeTextInput
+14. backend edit function needs to use page [don't need to change] - NOT DOING
+15. test the edit function (failed) - DONE
+16. debugging - NOT DOING
+17. need to refactor using a different way of making the id - NOT DOING
+28. refactor by having an attribute page_to_edit in this.state - NOT DONG
+29. refactor using getAttribute('page') - DONE
+30. do deletion ones - IN PROGRESS
+
+49.6.16 debugging - NOT DOING
+1. see what the backend receives - DONE
+2. see why the frontend is sending 'undefined' for the page - DONE
+3. try to use some attribute such as 'localName'(not working) - DONE
+
+49.6.11 backend function get_path needs to add page information as well as id - DONE
+1. add_page_information - DONE
+
+49.7 make button for showing the id - IN PROGRESS
+1. review the code - IN PROGRESS
 
 notes
 
