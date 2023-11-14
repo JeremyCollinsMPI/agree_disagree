@@ -1,3 +1,4 @@
+
 body {
   font: 14px "Century Gothic", Futura, sans-serif;
   margin: 20px;
@@ -15,8 +16,16 @@ body {
   font-size: 15px;
 }
 
-.active, .collapsible:hover {
+.active,
+.collapsible:hover {
   background-color: #555;
+}
+
+.visible-content {
+  padding: 0 18px;
+  display: block; 
+  overflow: hidden;
+  background-color: #f1f1f1;
 }
 
 .content {
@@ -26,17 +35,8 @@ body {
   background-color: #f1f1f1;
 }
 
-
 .deleteButton {
   margin-left: 20px;
-}
-
-.finishEditingButton {
-  margin-left: 20px;
-}
-
-.homePageButtons {
-  display: block;
 }
 
 
