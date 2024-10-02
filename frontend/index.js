@@ -7,7 +7,7 @@ import axios from 'axios';
 class Steps extends React.Component {
   constructor(props) {
     super(props);
-    this.ip = "http://103.102.44.216";
+    this.ip = "http://0.0.0.0";
     this.state = {
     text_dict: {
       "id": "NONE",
@@ -196,7 +196,7 @@ class Steps extends React.Component {
   
   async sendDeleteData(id){
     let data = {'id': id}
-    let url = this.ip + ":8081/delete?page=" + this.state.page + "&id=" + id;
+    let url = this.ip + ":8080/delete?page=" + this.state.page + "&id=" + id;
        await axios.post(url, data).then((response) => {
   console.log('hello');
   }, (error) => {
@@ -208,7 +208,7 @@ class Steps extends React.Component {
     let data = {'id': id, 'value': value, 'relationship': relationship};
     console.log('frnk');
     console.log(relationship);
-    let url = this.ip + ":8081/edit?page=" + page + "&id=" + id;
+    let url = this.ip + ":8080/edit?page=" + page + "&id=" + id;
        await axios.post(url, data).then((response) => {
   console.log('hello');
   }, (error) => {
@@ -221,7 +221,7 @@ class Steps extends React.Component {
     console.log(id);
     console.log(value);
     console.log(relationship);
-    let url = this.ip + ":8081/update?page=" + this.state.page;
+    let url = this.ip + ":8080/update?page=" + this.state.page;
        await axios.post(url, data).then((response) => {
   }, (error) => {
   console.log(error);
@@ -393,7 +393,7 @@ class Steps extends React.Component {
   }
   
   async getPageData(){
-    let url = this.ip + ":8081/pages";
+    let url = this.ip + ":8080/pages";
     await axios.get(url).then(response => {this.setState({"pageList": response.data['result']})}); 
     console.log(this.state.pageList);
     console.log('fun');
@@ -405,7 +405,7 @@ class Steps extends React.Component {
   
   async handleAddNewPageButtonClick() {
     let data = {'new_page_input': this.state.new_page_input};
-    let url = this.ip + ":8081/add_new_page";
+    let url = this.ip + ":8080/add_new_page";
        await axios.post(url, data).then((response) => {
   }, (error) => {
   console.log(error);
@@ -470,7 +470,7 @@ class Steps extends React.Component {
   }
 
   async getData(id) {
-  let url = this.ip + ":8081/get?page=" + id;
+  let url = this.ip + ":8080/get?page=" + id;
   await this.timeout(300);
   await axios.get(url).then(response => {this.setState({"text_dict": response.data['result']})});   
   this.setState({"page": id});
