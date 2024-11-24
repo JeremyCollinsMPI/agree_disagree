@@ -1,8 +1,17 @@
-FROM python:latest
-RUN pip install requests 
-RUN pip install flask
-RUN pip install flask-cors
-RUN pip install Werkzeug
-RUN pip install pandas
-RUN pip install beautifulsoup4
-WORKDIR /src
+# Base image
+FROM python:3.9-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy application files
+COPY . .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expose port 5000 for Flask
+EXPOSE 5000
+
+# Command to run the Flask app
+CMD ["python", "run.py"]

@@ -1,2 +1,2 @@
-docker build -t backer_frontend .
-docker run -it --rm  -v $PWD:/moose -p 3000:3000 backer_frontend /bin/bash /moose/entrypoint.sh
+docker build -t vue-app .
+docker run -d -p 8080:80 vue-app

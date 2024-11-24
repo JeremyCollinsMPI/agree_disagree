@@ -1,2 +1,2 @@
-docker build -t agree_backend .
-docker run -it --rm -v $PWD:/src --name agree_backend -p 8080:8080 agree_backend python main.py
+docker build -t flask-backend .
+docker run -d -p 5000:5000 flask-backend
